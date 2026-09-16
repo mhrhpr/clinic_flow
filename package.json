@@ -2,12 +2,19 @@
   "name": "clinic-flow",
   "version": "0.1.0",
   "private": true,
+  "workspaces": [
+    "apps/*",
+    "services/*",
+    "packages/*"
+  ],
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
+    "contracts:typecheck": "npm --workspace @clinicflow/contracts run typecheck",
+    "contracts:build": "npm --workspace @clinicflow/contracts run build",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
