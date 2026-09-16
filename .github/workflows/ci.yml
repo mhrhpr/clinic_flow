@@ -7,7 +7,8 @@ on:
     branches: [main]
 
 jobs:
-  validate:
+  web:
+    name: Web validation
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -18,14 +19,41 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install
+      - name: Install web dependencies
         run: npm install
 
       - name: Prisma generate
         run: npx prisma generate
 
-      - name: Typecheck
+      - name: Typecheck web
         run: npm run typecheck
 
-      - name: Lint
+      - name: Lint web
         run: npm run lint
+
+  patient-service:
+    name: Patient service validation
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/patient-service
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install service dependencies
+        run: npm install
+
+      - name: Typecheck service
+        run: npm run typecheck
+
+      - name: Test service
+        run: npm test
+
+      - name: Build service
+        run: npm run build
