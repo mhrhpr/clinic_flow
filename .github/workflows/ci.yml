@@ -58,12 +58,12 @@ jobs:
       - name: Build contracts
         run: npm run build
 
-  patient-service:
-    name: Patient service validation
+  identity-service:
+    name: Identity service validation
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: services/patient-service
+        working-directory: services/identity-service
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -91,6 +91,33 @@ jobs:
     defaults:
       run:
         working-directory: services/clinic-service
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install service dependencies
+        run: npm install
+
+      - name: Typecheck service
+        run: npm run typecheck
+
+      - name: Test service
+        run: npm test
+
+      - name: Build service
+        run: npm run build
+
+  patient-service:
+    name: Patient service validation
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/patient-service
     steps:
       - name: Checkout
         uses: actions/checkout@v4
