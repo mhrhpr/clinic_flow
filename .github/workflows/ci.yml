@@ -84,3 +84,30 @@ jobs:
 
       - name: Build service
         run: npm run build
+
+  clinic-service:
+    name: Clinic service validation
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/clinic-service
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install service dependencies
+        run: npm install
+
+      - name: Typecheck service
+        run: npm run typecheck
+
+      - name: Test service
+        run: npm test
+
+      - name: Build service
+        run: npm run build
