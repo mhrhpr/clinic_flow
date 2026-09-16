@@ -16,8 +16,6 @@ model Organization {
 
   clinics Clinic[]
   users   User[]
-
-  @@index([slug])
 }
 
 model Clinic {
@@ -81,10 +79,10 @@ enum Role {
 }
 
 model ClinicMembership {
-  id       String   @id @default(uuid())
-  clinicId String
-  userId   String
-  role     Role     @default(STAFF)
+  id        String   @id @default(uuid())
+  clinicId  String
+  userId    String
+  role      Role     @default(STAFF)
   createdAt DateTime @default(now())
 
   clinic Clinic @relation(fields: [clinicId], references: [id], onDelete: Cascade)
@@ -120,7 +118,6 @@ model Patient {
   @@index([clinicId])
   @@index([clinicId, lastName, firstName])
   @@index([clinicId, phone])
-  @@index([clinicId, externalId])
 }
 
 enum AppointmentStatus {
@@ -200,24 +197,24 @@ enum InvoiceStatus {
 }
 
 model Invoice {
-  id          String        @id @default(uuid())
-  clinicId    String
-  patientId   String
-  number      String
-  status      InvoiceStatus @default(DRAFT)
-  issueDate   DateTime      @default(now())
-  dueDate     DateTime?
-  subtotal    Decimal       @db.Decimal(18, 2)
-  discount    Decimal       @default(0) @db.Decimal(18, 2)
-  tax         Decimal       @default(0) @db.Decimal(18, 2)
-  total       Decimal       @db.Decimal(18, 2)
-  notes       String?
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  id        String        @id @default(uuid())
+  clinicId  String
+  patientId String
+  number    String
+  status    InvoiceStatus @default(DRAFT)
+  issueDate DateTime      @default(now())
+  dueDate   DateTime?
+  subtotal  Decimal       @db.Decimal(18, 2)
+  discount  Decimal       @default(0) @db.Decimal(18, 2)
+  tax       Decimal       @default(0) @db.Decimal(18, 2)
+  total     Decimal       @db.Decimal(18, 2)
+  notes     String?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
 
-  clinic  Clinic        @relation(fields: [clinicId], references: [id], onDelete: Cascade)
-  patient Patient       @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  items   InvoiceItem[]
+  clinic   Clinic        @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  patient  Patient       @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  items    InvoiceItem[]
   payments Payment[]
 
   @@unique([clinicId, number])
@@ -227,13 +224,13 @@ model Invoice {
 }
 
 model InvoiceItem {
-  id        String   @id @default(uuid())
-  invoiceId String
-  serviceId String?
+  id          String   @id @default(uuid())
+  invoiceId   String
+  serviceId   String?
   description String
-  quantity  Decimal  @default(1) @db.Decimal(12, 2)
-  unitPrice Decimal  @db.Decimal(18, 2)
-  total     Decimal  @db.Decimal(18, 2)
+  quantity    Decimal  @default(1) @db.Decimal(12, 2)
+  unitPrice   Decimal  @db.Decimal(18, 2)
+  total       Decimal  @db.Decimal(18, 2)
 
   invoice Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
   service Service? @relation(fields: [serviceId], references: [id], onDelete: SetNull)
@@ -250,15 +247,15 @@ enum PaymentMethod {
 }
 
 model Payment {
-  id         String        @id @default(uuid())
-  clinicId   String
-  invoiceId  String
-  amount     Decimal       @db.Decimal(18, 2)
-  method     PaymentMethod
-  paidAt     DateTime      @default(now())
-  reference  String?
-  notes      String?
-  createdAt  DateTime      @default(now())
+  id        String        @id @default(uuid())
+  clinicId  String
+  invoiceId String
+  amount    Decimal       @db.Decimal(18, 2)
+  method    PaymentMethod
+  paidAt    DateTime      @default(now())
+  reference String?
+  notes     String?
+  createdAt DateTime      @default(now())
 
   clinic  Clinic  @relation(fields: [clinicId], references: [id], onDelete: Cascade)
   invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
@@ -316,15 +313,15 @@ enum WorkflowStatus {
 }
 
 model WorkflowDefinition {
-  id        String         @id @default(uuid())
-  clinicId  String
-  key       String
-  name      String
-  status    WorkflowStatus @default(ACTIVE)
+  id         String         @id @default(uuid())
+  clinicId   String
+  key        String
+  name       String
+  status     WorkflowStatus @default(ACTIVE)
   definition Json
-  version   Int            @default(1)
-  createdAt DateTime       @default(now())
-  updatedAt DateTime       @updatedAt
+  version    Int            @default(1)
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
 
   clinic Clinic @relation(fields: [clinicId], references: [id], onDelete: Cascade)
 
@@ -362,17 +359,17 @@ model CustomFieldDefinition {
 }
 
 model CustomFieldValue {
-  id         String @id @default(uuid())
-  fieldId    String
-  patientId  String?
-  value      Json
-  updatedAt  DateTime @updatedAt
+  id        String   @id @default(uuid())
+  fieldId   String
+  entity    String
+  entityId  String
+  value     Json
+  updatedAt DateTime @updatedAt
 
-  field   CustomFieldDefinition @relation(fields: [fieldId], references: [id], onDelete: Cascade)
-  patient Patient?              @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  field CustomFieldDefinition @relation(fields: [fieldId], references: [id], onDelete: Cascade)
 
-  @@index([fieldId])
-  @@index([patientId])
+  @@unique([fieldId, entityId])
+  @@index([entity, entityId])
 }
 
 model AuditLog {
