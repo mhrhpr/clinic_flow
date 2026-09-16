@@ -18,6 +18,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
 
       - name: Install web dependencies
         run: npm install
@@ -30,6 +31,33 @@ jobs:
 
       - name: Lint web
         run: npm run lint
+
+  contracts:
+    name: Shared contracts validation
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/contracts
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install contract dependencies
+        run: npm install
+
+      - name: Typecheck contracts
+        run: npm run typecheck
+
+      - name: Test contracts
+        run: npm test
+
+      - name: Build contracts
+        run: npm run build
 
   patient-service:
     name: Patient service validation
