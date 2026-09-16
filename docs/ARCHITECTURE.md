@@ -2,100 +2,161 @@
 
 ## Architectural Decisions
 
-ClinicFlow is designed as a multi-tenant, multi-branch clinic operations platform.
+ClinicFlow is a multi-tenant, multi-branch clinic platform with configurable clinic-specific behavior.
 
 ### Core decisions
 
-1. **Multi-tenancy is first-class.** Every tenant-scoped record belongs to an Organization/Clinic context.
-2. **Multi-branch is supported.** An Organization can contain multiple Clinics/Branches.
-3. **Clinic personalization is first-class.** Clinic-specific behavior is represented through configuration, policies, feature/module settings, custom fields, branding, and workflows rather than branching the core codebase.
-4. **Core domain remains stable.** Patients, Appointments, Treatments, Billing, Payments, Expenses, Staff, Documents, and Audit remain reusable platform capabilities.
-5. **Personalization must not leak into core business logic as clinic-specific conditionals.** Application services resolve clinic context and policies before invoking domain rules.
-6. **Next.js App Router is the application shell.** UI concerns live in `app`, `features`, and shared components.
-7. **Business logic is separated from React.** Application use cases orchestrate workflows; domain modules contain business rules.
-8. **Persistence is abstracted.** Repository interfaces are defined independently from Prisma so storage adapters can evolve.
-9. **PostgreSQL is the target production database.** Prisma is the ORM/data-mapping layer.
-10. **External services are adapters.** Email, SMS, object storage, payment providers, calendars, and AI integrations sit behind integration/service boundaries.
-11. **Analytics and AI consume application/domain data without becoming the system of record.**
-12. **UX follows international accessibility and responsive-design practice.** WCAG 2.2 is the accessibility reference; accessible component systems and design tokens are preferred.
-13. **UI personalization is token/config driven.** Clinic branding, navigation, enabled modules, dashboards and visual preferences are resolved from clinic context and design tokens instead of duplicated component implementations.
-14. **RTL and LTR are first-class.** Localization is a system concern and must not be hard-coded into individual pages.
+1. **Multi-tenancy is first-class.** Every tenant-scoped operation resolves an Organization/Clinic context.
+2. **Multi-branch is supported.** An Organization may contain multiple clinics/branches.
+3. **Clinic personalization is first-class.** Configuration, policies, workflows, dashboard composition, theme tokens, and custom fields are data-driven.
+4. **Bounded contexts are explicit.** Patients, Scheduling, Treatments, Billing, Identity, Personalization, Notifications, and Analytics are separate service boundaries.
+5. **Microservice boundaries are domain boundaries.** A service owns its application logic, persistence model, API contract, and operational concerns.
+6. **The web application is not the system of record.** Next.js is the user-facing application/BFF layer.
+7. **Backend services are independent.** Backend microservices are implemented with Fastify and communicate through explicit HTTP/event contracts.
+8. **Persistence is owned by the service.** Each service owns its schema and repository implementation. Cross-service database joins are forbidden.
+9. **Domain rules are framework-independent.** Business logic must not depend directly on Fastify, Next.js, Prisma, or transport objects.
+10. **Application use cases orchestrate domain behavior.** Routes validate transport input and delegate to application use cases.
+11. **External dependencies are adapters.** Storage, messaging, email, SMS, payments, calendars, and AI providers sit behind integration boundaries.
+12. **Analytics/AI are consumers of business data.** They do not become authoritative owners of operational records.
+13. **UX is configuration-driven and accessible.** WCAG 2.2 is the accessibility reference; RTL/LTR and localization are platform concerns.
+
+## Target Repository Shape
+
+```text
+clinic_flow/
+├── apps/
+│   └── web/                         # Next.js App Router / BFF
+├── services/
+│   ├── identity-service/            # auth, sessions, memberships, RBAC
+│   ├── clinic-service/              # organization, clinics, configuration
+│   ├── patient-service/             # Patient 360
+│   ├── scheduling-service/          # appointments, availability, reminders
+│   ├── treatment-service/           # treatments and treatment plans
+│   ├── billing-service/             # invoices and billing policies
+│   ├── finance-service/             # payments, expenses, balances
+│   ├── notification-service/        # email/SMS/push
+│   └── analytics-service/           # reporting/read models
+├── packages/
+│   ├── contracts/                   # versioned cross-service API/event contracts
+│   ├── observability/               # logging/tracing helpers
+│   └── test-utils/                  # shared test utilities
+└── docs/
+```
+
+The current repository still contains the initial `src/` foundation. It is treated as a migration surface while backend services are extracted into the explicit service boundaries above. New business logic should be added to the owning service, not to the legacy global `src/domain` tree.
+
+## Service Internal Architecture
+
+Every backend service follows the same internal structure:
+
+```text
+service/
+├── src/
+│   ├── domain/
+│   │   ├── entities/
+│   │   ├── value-objects/
+│   │   ├── policies/
+│   │   └── repositories/            # interfaces only
+│   ├── application/
+│   │   ├── commands/
+│   │   ├── queries/
+│   │   └── services/
+│   ├── infrastructure/
+│   │   ├── persistence/
+│   │   ├── messaging/
+│   │   └── integrations/
+│   └── http/
+│       ├── routes/
+│       ├── schemas/
+│       └── presenters/
+├── prisma/
+├── tests/
+└── package.json
+```
+
+## Request Flow
+
+```text
+Browser
+   ↓
+Next.js BFF / Web
+   ↓
+Service API
+   ↓
+HTTP Schema Validation
+   ↓
+Application Use Case
+   ↓
+Clinic/Tenant Context
+   ↓
+Domain Policy + Entity
+   ↓
+Repository Port
+   ↓
+Service-Owned Database
+```
 
 ## Personalization Model
 
 Clinic customization has six levels:
 
 - **Configuration:** locale, timezone, currency, invoice numbering, working hours, enabled modules, payment methods, branding.
-- **Policies:** approval rules, payment/deposit rules, cancellation/refund rules, edit permissions, commission rules, billing policies.
-- **Workflows:** configurable operational sequences such as Lead → Consultation → Treatment → Invoice → Payment → Follow-up.
-- **Custom Fields:** clinic-defined patient, appointment, treatment, or operational metadata where the core model is insufficient.
-- **Dashboard Configuration:** role-aware widgets, KPIs, tables, alerts and quick actions selected for a clinic's operating model.
-- **UI Theme Tokens:** logo, typography choices, radius, density, accent palette and other non-structural branding settings.
+- **Policies:** approval rules, deposit rules, cancellation/refund rules, permissions, commission rules, billing policies.
+- **Workflows:** configurable operational sequences.
+- **Custom Fields:** generic metadata definitions and values for supported entities.
+- **Dashboard Configuration:** role-aware widgets, KPIs, tables, alerts and quick actions.
+- **UI Theme Tokens:** logo, accent palette, density, radius and typography preferences.
 
-### Personalization rule
+Prefer configuration/policy/workflow data when a clinic difference is a business preference. Introduce a domain capability when the variation represents a fundamentally different concept.
 
-Prefer data/configuration-driven variation when the difference is a business preference. Introduce a new domain capability when the variation represents a fundamentally different business concept.
+## Service Ownership Rules
 
-Examples:
+| Domain | Owning service | Primary records |
+|---|---|---|
+| Identity | identity-service | User, Session, Membership, Role |
+| Organization | clinic-service | Organization, Clinic, ClinicSetting, ClinicFeature |
+| Patients | patient-service | Patient, MedicalProfile, PatientCustomValue |
+| Scheduling | scheduling-service | Appointment, Availability, Reminder |
+| Treatments | treatment-service | Treatment, TreatmentPlan, Procedure |
+| Billing | billing-service | Invoice, InvoiceItem, BillingPolicy |
+| Finance | finance-service | Payment, Expense, Balance |
+| Notifications | notification-service | Message, Template, DeliveryLog |
+| Analytics | analytics-service | Read models, aggregates, reporting datasets |
 
-- Different invoice prefix → configuration.
-- Deposit required before treatment → policy.
-- Consultation → treatment → follow-up → workflow.
-- Custom patient field → custom field metadata.
-- Reception dashboard vs doctor dashboard → dashboard configuration + role permissions.
-- Dental charting vs generic treatment note → separate domain capability, not a boolean maze.
+A service may reference another service's identifiers, but never another service's database directly.
 
-## Runtime Flow
+## Integration Rules
 
-`UI → Application Use Case → Clinic Context → Policy/Configuration → Domain Rule → Repository → Database`
+- Synchronous operations use versioned HTTP APIs.
+- Asynchronous cross-service side effects use domain/integration events where appropriate.
+- Shared types are limited to transport contracts; business entities are not shared across service boundaries.
+- Every request entering a tenant-scoped service must carry authenticated identity and clinic context.
+- Sensitive patient data must not be logged.
+- Idempotency is required for externally retried commands such as payments and notifications.
 
-For UI:
+## Current Implementation Progress
 
-`Clinic Context → UI Configuration → Design Tokens / Navigation / Dashboard Composition → Components`
+### Patient Service
 
-A clinic-specific rule should be represented as configuration/policy/workflow data whenever practical, not as scattered `if (clinicId === ...)` logic.
+The first production-oriented service boundary is implemented under `services/patient-service`.
 
-## Domain Boundaries
+Current layers:
 
-- `patients`: Patient 360 and identity/contact/medical metadata.
-- `appointments`: scheduling, availability, status, reminders.
-- `treatments`: procedures, treatment plans, clinical/operational progression.
-- `billing`: invoices, line items, billing rules.
-- `finance`: payments, expenses, balances, financial policies.
-- `organization`: organization, clinics/branches, tenant context.
-- `staff`: users, roles, staff profiles, permissions.
-- `audit`: immutable audit trail.
-- `personalization`: configuration, policies, feature flags, workflows, custom fields, dashboard composition and theme settings.
+- Domain entity and factory
+- Repository interface
+- Create Patient application use case
+- In-memory repository adapter for the initial slice
+- Fastify HTTP transport
+- Zod request validation
+- Clinic context enforcement through `x-clinic-id`
+- Centralized error handling
 
-## External Reference Research
-
-The architecture is informed by patterns observed in public clinic/EMR and SaaS repositories:
-
-- `abinauv/dental-erp`: Next.js App Router, Prisma, tenant-scoped hospital/clinic context, role-based access, billing/payments, documents, audit logs, testing, CI/CD and localization.
-- `MyLikita-Health/sudoEMR`: broader EMR module separation across records, doctors, pharmacy, laboratory, accounting, appointments and patient workflows.
-- `uniqueabhishek/MedFlow-HMS`: Next.js + Prisma and dedicated unit/integration/E2E testing structure.
-- `abdulrehmankz1/clinic-management`: explicit multi-tenant isolation, staff/roles, appointments, dashboard flows, patient timeline, billing/payments, SaaS plans and audit logging.
-- `sudharsangs/nextjs-multitenant-saas-boilerplate`: tenant isolation, RBAC, subscriptions and audit logging for B2B SaaS.
-- `IrigoyenCodes/dashboard-starter`, `sjorsbogers/Dashboard-Design`, `shadcndashboard/next-shadcn-dashboard`, `masondevx/orbynadmin`, and `NextAdminHQ/nextjs-admin-dashboard`: feature-oriented dashboard composition, tables/forms/charts, role-aware navigation, themes, responsive layouts and configurable admin UX.
-
-## Standards & UX References
-
-- **W3C WCAG 2.2:** accessibility reference standard for the application UI.
-- **U.S. Web Design System (USWDS):** secondary reference for design tokens, accessible components, responsive patterns and form UX.
-- **CMS Design System:** healthcare-oriented reference for accessible and responsive service interfaces.
-
-See `docs/REFERENCE_STANDARDS.md` for the research notes and implementation implications.
-
-## Target Product Architecture
-
-ClinicFlow is a **modular monolith**, not a microservice system at this stage. Modules communicate through application/domain boundaries and repository/integration ports. This keeps deployment and development simple while preserving clear boundaries for future extraction if scale demands it.
-
-Core platform capabilities are shared across clinics. Clinic-specific differences are supplied through clinic context, configuration, policies, workflows, dashboard composition and theme tokens.
+The in-memory adapter is intentionally temporary. PostgreSQL persistence will be added behind the same repository interface without changing the domain or application layers.
 
 ## Non-Goals
 
+- Do not share databases across services.
+- Do not put business logic in Next.js pages/components.
 - Do not copy public repositories wholesale.
-- Do not fork the application for different clinic business models.
-- Do not put business rules inside React components or UI hooks.
-- Do not make Google Sheets the production system of record.
-- Do not introduce microservices merely for theoretical scalability.
+- Do not solve clinic-specific differences using `if (clinicId === ...)` branches scattered through the codebase.
+- Do not introduce distributed transactions when an event-driven workflow or explicit orchestration is sufficient.
