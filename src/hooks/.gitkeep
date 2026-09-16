@@ -1,0 +1,1 @@
+# React hooks only for UI/client concerns; domain rules do not live here.
