@@ -34,11 +34,15 @@ export async function registerPatientRoutes(app: FastifyInstance): Promise<void>
     try {
       const body = createPatientBodySchema.parse((request as CreatePatientRequest).body);
       const clinicId = getClinicId(request);
-      const input = { clinicId, firstName: body.firstName, lastName: body.lastName } as Parameters<typeof createPatientUseCase.execute>[0];
-      if (body.dateOfBirth !== undefined) input.dateOfBirth = body.dateOfBirth;
-      if (body.phone !== undefined) input.phone = body.phone;
-      if (body.email !== undefined) input.email = body.email;
-      if (body.notes !== undefined) input.notes = body.notes;
+      const input = {
+        clinicId,
+        firstName: body.firstName,
+        lastName: body.lastName,
+        ...(body.dateOfBirth === undefined ? {} : { dateOfBirth: body.dateOfBirth }),
+        ...(body.phone === undefined ? {} : { phone: body.phone }),
+        ...(body.email === undefined ? {} : { email: body.email }),
+        ...(body.notes === undefined ? {} : { notes: body.notes }),
+      };
       const patient = await createPatientUseCase.execute(input);
       return reply.code(201).send({ data: patient });
     } catch (error) {
