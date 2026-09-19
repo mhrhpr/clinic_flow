@@ -1,11 +1,12 @@
 import Link from "next/link";
-import { CalendarDays, CircleDollarSign, LayoutDashboard, Users, Sparkles } from "lucide-react";
+import { CalendarDays, CircleDollarSign, LayoutDashboard, Users, Sparkles, Target } from "lucide-react";
 import type { ClinicContext } from "@/personalization/types";
 import { AidaBrand } from "@/components/brand/AidaBrand";
 
 const navigation = [
   { href: "/dashboard", label: "داشبورد", icon: LayoutDashboard },
   { href: "/patients", label: "بیماران", icon: Users },
+  { href: "/revenue", label: "فرصت‌های درآمدی", icon: Target },
   { href: "/appointments", label: "نوبت‌ها", icon: CalendarDays },
   { href: "/treatments", label: "درمان‌ها", icon: Sparkles },
   { href: "/invoices", label: "مالی", icon: CircleDollarSign },
