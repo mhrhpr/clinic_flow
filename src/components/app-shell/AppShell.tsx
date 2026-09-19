@@ -44,7 +44,7 @@ export function AppShell({ context, children }: { context: ClinicContext; childr
         </header>
 
         <div className="border-b border-[var(--border)] bg-[var(--surface)] px-3 py-2 lg:hidden">
-          <nav className="grid grid-cols-5 gap-1" aria-label="ناوبری اصلی">
+          <nav className="grid grid-cols-6 gap-1" aria-label="ناوبری اصلی">
             {navigation.map(({ href, label, icon: Icon }) => <Link key={href} href={href} className="flex min-h-12 flex-col items-center justify-center rounded-xl px-1 py-1 text-[11px] font-medium text-[var(--muted)]"><Icon size={17} aria-hidden="true" /><span className="mt-1">{label}</span></Link>)}
           </nav>
         </div>
