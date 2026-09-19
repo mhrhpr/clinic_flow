@@ -16,10 +16,10 @@ test("critical ClinicFlow patient and appointment workflows", async ({ page }) =
   const uniquePhone = "+1 202 555 0199";
   await page.getByRole("button", { name: "+ New patient" }).click();
   await expect(page.getByRole("dialog", { name: "New patient" })).toBeVisible();
-  await page.getByLabel("Full name").fill(uniqueName);
-  await page.getByLabel("Phone").fill(uniquePhone);
-  await page.getByLabel("Initial service").fill("E2E consultation");
-  await page.getByRole("button", { name: "Create patient" }).click();
+  await dialog.getByLabel("Full name").fill(uniqueName);
+  await dialog.getByLabel("Phone", { exact: true }).fill(uniquePhone);
+  await dialog.getByLabel("Initial service").fill("E2E consultation");
+  await dialog.getByRole("button", { name: "Create patient" }).click();
 
   await expect(page.getByRole("cell", { name: uniqueName })).toBeVisible();
   await page.getByRole("textbox", { name: "Search patients, phone or treatment" }).fill("E2E ClinicFlow");
