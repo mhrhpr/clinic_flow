@@ -1,4 +1,5 @@
 name: CI
+# Revenue OS validation contract
 
 on:
   push:
