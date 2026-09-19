@@ -18,11 +18,11 @@ jobs:
       - name: Checkout exact PR head
         uses: actions/checkout@v4
         with:
-          ref: \${{ github.event.pull_request.head.sha || github.sha }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Assert exact source commit
         run: |
-          test "$(git rev-parse HEAD)" = "\${{ github.event.pull_request.head.sha || github.sha }}"
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -73,13 +73,13 @@ jobs:
           if [ -f /tmp/clinicflow-next.log ]; then tail -n 80 /tmp/clinicflow-next.log; fi
 
       - name: Wait for Vercel deployment on exact commit
-        if: \${{ github.event_name == 'pull_request' }}
+        if: ${{ github.event_name == 'pull_request' }}
         uses: actions/github-script@v7
         with:
           script: |
             const sha = context.payload.pull_request.head.sha;
             const deadline = Date.now() + 20 * 60 * 1000;
-            let lastState = 'not-found';
+            let lastState = "not-found";
 
             while (Date.now() < deadline) {
               const { data } = await github.rest.repos.listCommitStatusesForRef({
@@ -88,14 +88,18 @@ jobs:
                 ref: sha
               });
 
-              const vercel = data.find((status) => status.context === 'Vercel');
+              const vercels = data
+                .filter((status) => status.context === "Vercel")
+                .sort((a, b) => new Date(b.updated_at || b.created_at).getTime() - new Date(a.updated_at || a.created_at).getTime());
+
+              const vercel = vercels[0];
 
               if (vercel) {
                 lastState = vercel.state;
-                core.notice('Vercel status for ' + sha + ': ' + vercel.state);
-                if (vercel.state === 'success') return;
-                if (['failure', 'error'].includes(vercel.state)) {
-                  core.setFailed('Vercel deployment failed: ' + (vercel.description || vercel.target_url || vercel.state));
+                core.notice("Vercel status for " + sha + ": " + vercel.state);
+                if (vercel.state === "success") return;
+                if (["failure", "error"].includes(vercel.state)) {
+                  core.setFailed("Vercel deployment failed: " + (vercel.description || vercel.target_url || vercel.state));
                   return;
                 }
               }
@@ -103,7 +107,7 @@ jobs:
               await new Promise((resolve) => setTimeout(resolve, 10_000));
             }
 
-            core.setFailed('Vercel deployment did not reach success before the deadline. Last state: ' + lastState);
+            core.setFailed("Vercel deployment did not reach success before the deadline. Last state: " + lastState);
 
   patient-service:
     name: Patient service validation
@@ -115,11 +119,11 @@ jobs:
       - name: Checkout exact PR head
         uses: actions/checkout@v4
         with:
-          ref: \${{ github.event.pull_request.head.sha || github.sha }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Assert exact source commit
         run: |
-          test "$(git rev-parse HEAD)" = "\${{ github.event.pull_request.head.sha || github.sha }}"
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
 
       - name: Setup Node
         uses: actions/setup-node@v4
