@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import type { DemoAppointment, DemoPatient } from "@/lib/server/demo-store";
 
-type Section = "dashboard" | "patients" | "appointments" | "treatments" | "billing";
+type Section = "dashboard" | "patients" | "appointments" | "treatments" | "billing" | "revenue";
 type PatientFormResult = Pick<DemoPatient, "id" | "name" | "phone" | "service" | "status">;
 
 const fallbackPatients: DemoPatient[] = [
@@ -37,6 +37,7 @@ function fa(value: string | number) {
 export function ClinicDashboard({ section }: { section: Section }) {
   if (section === "patients") return <Patients />;
   if (section === "appointments") return <Appointments />;
+  if (section === "revenue") return <RevenueOpportunities />;
   if (section === "treatments") {
     return <Module title="درمان‌ها" eyebrow="جریان درمان" description="برنامه‌های درمانی، خدمات انجام‌شده و پیگیری مراجعه بعدی را در یک نمای بیمارمحور مدیریت کنید." stats={["۱۸ برنامه فعال", "۷ پیگیری امروز", "۳ مورد نیازمند تأیید"]} />;
   }
@@ -256,6 +257,54 @@ function Appointments() {
           ))}
         </div>
       </section>
+    </div>
+  );
+}
+
+function RevenueOpportunities() {
+  const opportunities = [
+    { id: "r-1", type: "پیگیری معوق", name: "النا کریمی", reason: "مشاوره انجام شده اما ۶ روز است اقدام بعدی ثبت نشده.", value: "۱٫۸ م", urgency: "بالا", action: "تماس پیگیری و پیشنهاد زمان" },
+    { id: "r-2", type: "لید بدون پیگیری", name: "سارا محمدی", reason: "لید ورودی با ارزش برآوردی بالا؛ آخرین تماس ۴۸ ساعت قبل.", value: "۱٫۲ م", urgency: "بالا", action: "پیگیری امروز" },
+    { id: "r-3", type: "بازگشت درمان", name: "مریم حسینی", reason: "جلسه قبلی کامل شده و بازه پیشنهادی مراجعه بعدی رسیده است.", value: "۸۰۰ ک", urgency: "متوسط", action: "پیشنهاد رزرو جلسه بعد" },
+  ];
+
+  return (
+    <div className="space-y-6">
+      <header>
+        <p className="text-sm font-semibold text-[var(--brand)]">Revenue Intelligence</p>
+        <h1 className="mt-1 text-3xl font-bold">فرصت‌های درآمدی</h1>
+        <p className="mt-2 max-w-2xl text-sm leading-7 text-[var(--muted)]">سیستم به‌جای نمایش یک KPI خام، فرصت را با شواهد، ارزش تقریبی و اقدام بعدی نشان می‌دهد.</p>
+      </header>
+      <div className="grid gap-4 sm:grid-cols-3">
+        <Metric label="درآمد در معرض ریسک" value="۳٫۸ م" note="برآورد نمایشی؛ هنوز اعتبارسنجی نشده" />
+        <Metric label="فرصت‌های باز" value="۷" note="۳ فرصت با اولویت بالا" />
+        <Metric label="اقدام امروز" value="۴" note="نیازمند تأیید تیم" />
+      </div>
+      <section className="space-y-3">
+        {opportunities.map((item) => (
+          <article key={item.id} className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm">
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="rounded-full bg-[var(--brand-soft)] px-2.5 py-1 text-xs font-semibold text-[var(--brand)]">{item.type}</span>
+                  <span className="text-xs text-[var(--muted)]">اولویت {item.urgency}</span>
+                </div>
+                <h2 className="mt-3 font-bold">{item.name}</h2>
+                <p className="mt-1 max-w-2xl text-sm leading-6 text-[var(--muted)]">{item.reason}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-xs text-[var(--muted)]">ارزش تقریبی</p>
+                <p className="mt-1 text-2xl font-black">{item.value}</p>
+              </div>
+            </div>
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-[var(--background)] p-3">
+              <p className="text-sm"><span className="font-semibold">اقدام پیشنهادی:</span> {item.action}</p>
+              <button type="button" className="rounded-lg bg-[var(--brand)] px-3 py-2 text-xs font-semibold text-white">بررسی و تأیید</button>
+            </div>
+          </article>
+        ))}
+      </section>
+      <p className="text-xs leading-6 text-[var(--muted)]">این داده‌ها نمایشی‌اند. امتیاز و ارزش فرصت در نسخه تولیدی باید از داده واقعی و مدل اعتبارسنجی‌شده محاسبه شود.</p>
     </div>
   );
 }
