@@ -3,6 +3,7 @@
 ## Required before claiming DONE
 
 - [ ] Exact branch/PR head contains intended changes
+- [ ] CI checks out and asserts the exact PR head commit
 - [ ] Prisma generate passes
 - [ ] Web typecheck passes
 - [ ] Web lint passes
@@ -10,8 +11,9 @@
 - [ ] Production server starts
 - [ ] Dashboard route responds
 - [ ] Critical preview APIs respond
-- [ ] Browser smoke test passes when browser automation is available
-- [ ] Vercel deployment for the exact commit succeeds
+- [ ] Playwright browser smoke passes
+- [ ] Critical browser flow has no console errors
+- [ ] Vercel deployment for the exact commit reports success
 - [ ] No known blocking error remains
 
 Rule: do not report DONE while any required gate is unchecked.
