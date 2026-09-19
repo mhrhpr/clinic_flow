@@ -1,17 +1,14 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"], display: "swap", variable: "--font-inter" });
-
 export const metadata: Metadata = {
-  title: { default: "ClinicFlow", template: "%s · ClinicFlow" },
-  description: "Clinic operations and patient workflow platform",
+  title: { default: "کلینیک آیدا · ClinicFlow", template: "%s · کلینیک آیدا" },
+  description: "سامانه مدیریت و جریان عملیاتی کلینیک آیدا",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" dir="ltr" className={inter.variable}>
+    <html lang="fa" dir="rtl">
       <body>{children}</body>
     </html>
   );
