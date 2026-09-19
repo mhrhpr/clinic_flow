@@ -32,7 +32,7 @@ function Dashboard() {
       <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm"><div className="flex items-center justify-between"><div><h2 className="font-semibold">Today&apos;s schedule</h2><p className="mt-1 text-xs text-[var(--muted)]">Live operational queue</p></div><a href="/appointments" className="text-sm font-medium text-[var(--brand)]">View calendar →</a></div><div className="mt-5 divide-y divide-[var(--border)]">{appointments.map(a => <div key={a.time} className="grid grid-cols-[70px_1fr_auto] items-center gap-4 py-4"><b>{a.time}</b><div><p className="text-sm font-medium">{a.patient}</p><p className="mt-1 text-xs text-[var(--muted)]">{a.service} · {a.doctor}</p></div><Status value={a.status} /></div>)}</div></section>
       <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm"><h2 className="font-semibold">Quick actions</h2><div className="mt-4 grid gap-3">{[["Register patient","Create a new patient record"],["Book appointment","Find the next available slot"],["Create invoice","Turn a treatment into a bill"],["Patient 360","Open the complete timeline"]].map(([a,b]) => <button key={a} className="rounded-xl border border-[var(--border)] p-4 text-left hover:border-[var(--brand)]"><p className="text-sm font-semibold">{a}</p><p className="mt-1 text-xs text-[var(--muted)]">{b}</p></button>)}</div></section>
     </div>
-    {showForm && <PatientForm onClose={() => setShowForm(false)} />}
+    {showForm && <PatientForm onClose={() => setShowForm(false)} onCreated={(patient) => setItems((current) => [patient, ...current])} />}
   </div>;
 }
 function Patients() {
@@ -59,7 +59,7 @@ function Module({title,eyebrow,description,stats}:{title:string;eyebrow:string;d
 }
 function Metric({label,value,note}:{label:string;value:string;note:string}) { return <article className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm"><p className="text-sm text-[var(--muted)]">{label}</p><p className="mt-2 text-3xl font-bold">{value}</p><p className="mt-2 text-xs text-[var(--muted)]">{note}</p></article>; }
 function Status({value}:{value:string}) { return <span className="rounded-full border border-[var(--border)] px-2.5 py-1 text-xs font-medium">{value}</span>; }
-function PatientForm({onClose}:{onClose:()=>void}) {
+function PatientForm({onClose,onCreated}:{onClose:()=>void;onCreated?:(patient:{id:string;name:string;phone:string;service:string;status:"Active"|"Follow-up"|"New"})=>void}) {
   const [name,setName]=useState("");
   const [phone,setPhone]=useState("");
   const [service,setService]=useState("");
@@ -70,6 +70,8 @@ function PatientForm({onClose}:{onClose:()=>void}) {
     const response = await fetch("/api/demo/patients", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name, phone, service }) });
     if (response.status === 409) { setError("A patient with this phone number already exists."); setSaving(false); return; }
     if (!response.ok) { setError("Could not create patient."); setSaving(false); return; }
+    const result = await response.json();
+    onCreated?.(result.data);
     onClose();
   }
   return <div className="fixed inset-0 z-50 grid place-items-center bg-black/30 p-4"><div className="w-full max-w-md rounded-2xl bg-[var(--surface)] p-6 shadow-xl"><h2 className="text-lg font-semibold">New patient</h2><p className="mt-1 text-xs text-[var(--muted)]">Demo workflow; persistence is the next service integration gate.</p><div className="mt-5 space-y-3"><input value={name} onChange={e=>setName(e.target.value)} placeholder="Full name" className="w-full rounded-xl border border-[var(--border)] px-4 py-3 text-sm outline-none focus:border-[var(--brand)]" /><input value={phone} onChange={e=>setPhone(e.target.value)} placeholder="Phone" className="w-full rounded-xl border border-[var(--border)] px-4 py-3 text-sm outline-none focus:border-[var(--brand)]" /><input value={service} onChange={e=>setService(e.target.value)} placeholder="Initial service" className="w-full rounded-xl border border-[var(--border)] px-4 py-3 text-sm outline-none focus:border-[var(--brand)]" /></div>{error && <p className="mt-3 text-sm text-[var(--danger)]">{error}</p>}<div className="mt-5 flex justify-end gap-2"><button onClick={onClose} className="rounded-xl border border-[var(--border)] px-4 py-2 text-sm">Cancel</button><button disabled={!name.trim() || saving} onClick={() => void submit()} className="rounded-xl bg-[var(--brand)] px-4 py-2 text-sm font-semibold text-white disabled:opacity-40">{saving ? "Creating…" : "Create patient"}</button></div></div></div>; }
