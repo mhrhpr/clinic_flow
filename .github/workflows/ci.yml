@@ -6,13 +6,23 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+  statuses: read
+
 jobs:
   web:
     name: Web validation
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout exact PR head
         uses: actions/checkout@v4
+        with:
+          ref: \${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Assert exact source commit
+        run: |
+          test "$(git rev-parse HEAD)" = "\${{ github.event.pull_request.head.sha || github.sha }}"
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -62,6 +72,39 @@ jobs:
           if [ -f /tmp/clinicflow-next.pid ]; then kill $(cat /tmp/clinicflow-next.pid) || true; fi
           if [ -f /tmp/clinicflow-next.log ]; then tail -n 80 /tmp/clinicflow-next.log; fi
 
+      - name: Wait for Vercel deployment on exact commit
+        if: \${{ github.event_name == 'pull_request' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const sha = context.payload.pull_request.head.sha;
+            const deadline = Date.now() + 20 * 60 * 1000;
+            let lastState = 'not-found';
+
+            while (Date.now() < deadline) {
+              const { data } = await github.rest.repos.listCommitStatusesForRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: sha
+              });
+
+              const vercel = data.find((status) => status.context === 'Vercel');
+
+              if (vercel) {
+                lastState = vercel.state;
+                core.notice('Vercel status for ' + sha + ': ' + vercel.state);
+                if (vercel.state === 'success') return;
+                if (['failure', 'error'].includes(vercel.state)) {
+                  core.setFailed('Vercel deployment failed: ' + (vercel.description || vercel.target_url || vercel.state));
+                  return;
+                }
+              }
+
+              await new Promise((resolve) => setTimeout(resolve, 10_000));
+            }
+
+            core.setFailed('Vercel deployment did not reach success before the deadline. Last state: ' + lastState);
+
   patient-service:
     name: Patient service validation
     runs-on: ubuntu-latest
@@ -69,8 +112,14 @@ jobs:
       run:
         working-directory: services/patient-service
     steps:
-      - name: Checkout
+      - name: Checkout exact PR head
         uses: actions/checkout@v4
+        with:
+          ref: \${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Assert exact source commit
+        run: |
+          test "$(git rev-parse HEAD)" = "\${{ github.event.pull_request.head.sha || github.sha }}"
 
       - name: Setup Node
         uses: actions/setup-node@v4
