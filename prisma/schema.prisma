@@ -39,6 +39,10 @@ model Clinic {
   services     Service[]
   treatments   Treatment[]
   invoices     Invoice[]
+  leads        Lead[]
+  interactions Interaction[]
+  consultations Consultation[]
+  followUps    FollowUp[]
   payments     Payment[]
   expenses     Expense[]
   settings     ClinicSetting[]
@@ -46,6 +50,11 @@ model Clinic {
   workflows    WorkflowDefinition[]
   customFields CustomFieldDefinition[]
   auditLogs    AuditLog[]
+  leads        Lead[]
+  interactions Interaction[]
+  consultations Consultation[]
+  followUps    FollowUp[]
+  campaigns    Campaign[]
 
   @@unique([organizationId, slug])
   @@index([organizationId])
@@ -119,6 +128,7 @@ model Patient {
   @@index([clinicId, phone])
 }
 
+
 enum AppointmentStatus {
   SCHEDULED
   CONFIRMED
@@ -162,6 +172,7 @@ model Service {
   clinic     Clinic          @relation(fields: [clinicId], references: [id], onDelete: Cascade)
   treatments Treatment[]
   items      InvoiceItem[]
+  leads      Lead[]
 
   @@unique([clinicId, code])
   @@index([clinicId, isActive])
@@ -386,4 +397,128 @@ model AuditLog {
 
   @@index([clinicId, createdAt])
   @@index([clinicId, entity, entityId])
+}
+
+ 
+model Lead {
+  id          String   @id @default(uuid())
+  clinicId    String
+  patientId   String?
+  name        String
+  phone       String?
+  source      String?
+  serviceId   String?
+  stage       LeadStage @default(NEW)
+  estimatedValue Decimal? @db.Decimal(18, 2)
+  lastContactedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  clinic Clinic @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  patient Patient? @relation(fields: [patientId], references: [id], onDelete: SetNull)
+  service Service? @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+  interactions Interaction[]
+  consultations Consultation[]
+  followUps FollowUp[]
+  campaign Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  campaignId String?
+
+  @@index([clinicId, stage, createdAt])
+  @@index([clinicId, phone])
+}
+
+enum LeadStage {
+  NEW
+  CONTACTED
+  QUALIFIED
+  CONSULTATION
+  APPOINTMENT
+  TREATMENT
+  PAYMENT
+  FOLLOW_UP
+  REPEAT
+  LOST
+}
+
+model Interaction {
+  id        String   @id @default(uuid())
+  clinicId  String
+  leadId    String?
+  patientId String?
+  staffId   String?
+  channel   String
+  direction String
+  occurredAt DateTime @default(now())
+  summary   String?
+  createdAt DateTime @default(now())
+
+  clinic Clinic @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  lead Lead? @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  patient Patient? @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@index([clinicId, occurredAt])
+  @@index([clinicId, leadId, occurredAt])
+}
+
+model Consultation {
+  id          String   @id @default(uuid())
+  clinicId    String
+  leadId      String?
+  patientId   String?
+  occurredAt  DateTime @default(now())
+  outcome     String?
+  estimatedValue Decimal? @db.Decimal(18, 2)
+  treatmentId String?
+  createdAt   DateTime @default(now())
+
+  clinic Clinic @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  lead Lead? @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  patient Patient? @relation(fields: [patientId], references: [id], onDelete: SetNull)
+
+  @@index([clinicId, occurredAt])
+}
+
+enum FollowUpStatus {
+  OPEN
+  DUE
+  COMPLETED
+  SKIPPED
+  CANCELLED
+}
+
+model FollowUp {
+  id           String   @id @default(uuid())
+  clinicId     String
+  leadId       String?
+  patientId    String?
+  assignedToId String?
+  dueAt        DateTime
+  completedAt  DateTime?
+  status       FollowUpStatus @default(OPEN)
+  reason       String?
+  estimatedValue Decimal? @db.Decimal(18, 2)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  clinic Clinic @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  lead Lead? @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  patient Patient? @relation(fields: [patientId], references: [id], onDelete: SetNull)
+
+  @@index([clinicId, status, dueAt])
+}
+
+model Campaign {
+  id        String   @id @default(uuid())
+  clinicId  String
+  name      String
+  channel   String?
+  startsAt  DateTime?
+  endsAt    DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  clinic Clinic @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  leads Lead[]
+
+  @@index([clinicId, startsAt])
 }
