@@ -113,7 +113,6 @@ model Patient {
   appointments Appointment[]
   treatments   Treatment[]
   invoices     Invoice[]
-  customValues CustomFieldValue[]
 
   @@index([clinicId])
   @@index([clinicId, lastName, firstName])
