@@ -9,7 +9,7 @@ const defaultClinicContext: ClinicContext = {
     timezone: "UTC",
     currency: "USD",
     branding: {
-      name: "Demo Clinic",
+      name: "Aida Clinic",
       primaryColor: "#0f766e",
     },
     features: {
