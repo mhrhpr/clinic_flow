@@ -43,6 +43,7 @@ model Clinic {
   interactions Interaction[]
   consultations Consultation[]
   followUps    FollowUp[]
+  campaigns    Campaign[]
   payments     Payment[]
   expenses     Expense[]
   settings     ClinicSetting[]
