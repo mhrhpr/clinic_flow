@@ -31,6 +31,31 @@ jobs:
       - name: Lint web
         run: npm run lint
 
+      - name: Production build
+        run: npm run build
+
+      - name: Start production server
+        run: |
+          npm run start -- -H 127.0.0.1 -p 3100 > /tmp/clinicflow-next.log 2>&1 &
+          echo $! > /tmp/clinicflow-next.pid
+
+      - name: Runtime smoke test
+        run: |
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:3100/dashboard > /tmp/dashboard.html; then break; fi
+            sleep 1
+          done
+          test -s /tmp/dashboard.html
+          grep -q "ClinicFlow" /tmp/dashboard.html
+          curl -fsS http://127.0.0.1:3100/api/demo/patients | grep -q '"data"'
+          curl -fsS http://127.0.0.1:3100/api/demo/appointments | grep -q '"data"'
+
+      - name: Stop production server
+        if: always()
+        run: |
+          if [ -f /tmp/clinicflow-next.pid ]; then kill $(cat /tmp/clinicflow-next.pid) || true; fi
+          if [ -f /tmp/clinicflow-next.log ]; then tail -n 80 /tmp/clinicflow-next.log; fi
+
   patient-service:
     name: Patient service validation
     runs-on: ubuntu-latest
