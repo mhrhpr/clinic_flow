@@ -1,45 +1,46 @@
 # ClinicFlow — OMIND Company OS Delivery Record
 
-## Mission
-Turn the existing ClinicFlow foundation into a coherent, navigable SaaS product surface while preserving the established multi-tenant architecture.
+## Delivery contract
 
-## Internal roles
-- Product: define the first usable clinic workflow.
-- Architecture: preserve bounded contexts and service ownership.
-- Research: inspect public clinic-management and SaaS repositories for patterns.
-- UX: create a low-friction clinic operations dashboard.
-- Engineering: implement the web product surface.
-- QA: verify navigation, forms, state transitions and type safety.
-- Security: keep patient data out of logs and preserve tenant-context boundaries.
+A change is NOT DONE because code was written, committed, or deployed.
 
-## Evidence
-The repository already contained architecture and reference-standard documents. Public GitHub research was refreshed against clinic-management, medical-management and multi-tenant SaaS projects. The existing architecture explicitly defines tenant isolation, service ownership, WCAG 2.2 as the accessibility reference, and separation between UI and business logic.
+A change is HANDOFF-READY only when every gate below is green on the exact commit being handed off:
 
-## Product slice delivered
-1. Product landing page
-2. Dashboard / operational overview
-3. Patient search
-4. Patient creation interaction
-5. Appointment queue and status transition
-6. Treatments module surface
-7. Billing module surface
-8. Existing clinic-context and bounded-service foundation preserved
+1. Source gate — intended changes exist on the exact branch/PR head.
+2. Static gate — web typecheck + lint pass; patient service typecheck + tests + build pass.
+3. Schema gate — Prisma generate succeeds.
+4. Production build gate — Next production build succeeds.
+5. Runtime gate — production server starts and dashboard + critical preview APIs respond.
+6. Browser gate — core flows are exercised in a real browser when browser automation is available: dashboard load, navigation, search, create patient, change appointment status, responsive layout, console errors.
+7. Deployment gate — Vercel deployment for the exact commit succeeds.
+8. Handoff gate — only then may the assistant say DONE.
 
-## Verification
+If any gate fails, the state is IN PROGRESS or BLOCKED. Report the failing gate; do not report completion.
 
-Latest CI trigger includes the corrected Prisma schema on the PR head.
+## Automatically enforced gates
 
+The CI workflow enforces static, schema, production-build and runtime-smoke gates.
 
-Every delivery must pass repository CI before Preview handoff. Browser-level verification is performed when the browser automation runtime is available.
+## Core product slice
+
+- Landing page
+- Dashboard
+- Patient 360 / search / creation
+- Appointment queue / status transition
+- Treatments surface
+- Billing surface
+- Clinic context foundation
 
 ## Verification boundary
-This commit is a functional product/demo slice. Patient and appointment mutations are local UI state until authenticated service persistence is connected. It is not represented as a production healthcare system.
+
+Preview/demo patient and appointment data are isolated until authenticated production persistence is connected. This is not yet a production healthcare system.
 
 ## Next production gates
-- Identity/session service and RBAC enforcement
-- PostgreSQL persistence behind service-owned repositories
-- Scheduling conflict and timezone policies
-- Patient access controls and audit trail
-- Integration/E2E tests
-- Production observability
+
+- Identity/session + RBAC
+- PostgreSQL service-owned persistence
+- Scheduling conflict/timezone policies
+- Patient access controls + audit trail
+- Integration/E2E coverage
+- Observability
 - Deployment environment and secrets
