@@ -27,6 +27,9 @@ The repository already contained architecture and reference-standard documents. 
 
 ## Verification
 
+Latest CI trigger includes the corrected Prisma schema on the PR head.
+
+
 Every delivery must pass repository CI before Preview handoff. Browser-level verification is performed when the browser automation runtime is available.
 
 ## Verification boundary
