@@ -7,6 +7,7 @@ export type DemoPatient = {
 };
 
 export type DemoAppointment = {
+  id: string;
   time: string;
   patient: string;
   doctor: string;
@@ -22,10 +23,10 @@ const seedPatients: DemoPatient[] = [
 ];
 
 const seedAppointments: DemoAppointment[] = [
-  { time: "09:30", patient: "Sarah Mitchell", doctor: "Dr. A. Rahimi", service: "Consultation", status: "Confirmed" },
-  { time: "10:15", patient: "Emma Carter", doctor: "Dr. A. Rahimi", service: "Skin treatment", status: "Waiting" },
-  { time: "11:00", patient: "Olivia Brown", doctor: "Dr. N. Smith", service: "Botox consultation", status: "Confirmed" },
-  { time: "13:30", patient: "Mia Wilson", doctor: "Dr. N. Smith", service: "Laser session", status: "Completed" },
+  { id: "a-1", time: "09:30", patient: "Sarah Mitchell", doctor: "Dr. A. Rahimi", service: "Consultation", status: "Confirmed" },
+  { id: "a-2", time: "10:15", patient: "Emma Carter", doctor: "Dr. A. Rahimi", service: "Skin treatment", status: "Waiting" },
+  { id: "a-3", time: "11:00", patient: "Olivia Brown", doctor: "Dr. N. Smith", service: "Botox consultation", status: "Confirmed" },
+  { id: "a-4", time: "13:30", patient: "Mia Wilson", doctor: "Dr. N. Smith", service: "Laser session", status: "Completed" },
 ];
 
 type ClinicFlowDemoState = {
@@ -33,7 +34,9 @@ type ClinicFlowDemoState = {
   appointments: DemoAppointment[];
 };
 
-const globalStore = globalThis as typeof globalThis & { __clinicFlowDemo?: ClinicFlowDemoState };
+const globalStore = globalThis as typeof globalThis & {
+  __clinicFlowDemo?: ClinicFlowDemoState;
+};
 
 function getStore(): ClinicFlowDemoState {
   globalStore.__clinicFlowDemo ??= {
@@ -54,28 +57,34 @@ export function listDemoPatients(query = "") {
 
 export function createDemoPatient(input: Pick<DemoPatient, "name" | "phone" | "service">) {
   const store = getStore();
-  if (input.phone.trim() && store.patients.some((patient) => patient.phone === input.phone.trim())) {
+  const phone = input.phone.trim();
+
+  if (phone && store.patients.some((patient) => patient.phone === phone)) {
     return { conflict: true as const };
   }
+
   const patient: DemoPatient = {
     id: "p-" + crypto.randomUUID(),
     name: input.name.trim(),
-    phone: input.phone.trim(),
+    phone,
     service: input.service.trim(),
     status: "New",
   };
+
   store.patients.unshift(patient);
   return { conflict: false as const, patient };
 }
 
 export function listDemoAppointments() {
-  return getStore().appointments;
+  return structuredClone(getStore().appointments);
 }
 
-export function updateDemoAppointment(index: number, status: DemoAppointment["status"]) {
+export function updateDemoAppointment(id: string, status: DemoAppointment["status"]) {
   const store = getStore();
-  const appointment = store.appointments[index];
+  const appointment = store.appointments.find((item) => item.id === id);
+
   if (!appointment) return null;
+
   appointment.status = status;
-  return appointment;
+  return structuredClone(appointment);
 }
