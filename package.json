@@ -13,7 +13,8 @@
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "db:studio": "prisma studio",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "test:unit": "vitest run"
   },
   "engines": {
     "node": ">=20"
@@ -39,6 +40,7 @@
     "postcss": "^8.4.49",
     "tailwindcss": "^4.1.18",
     "typescript": "^5.7.0",
-    "prisma": "6.15.0"
+    "prisma": "6.15.0",
+    "vitest": "^3.2.4"
   }
 }
