@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "ClinicFlow",
-  description: "Clinic operations and management platform",
+  title: { default: "ClinicFlow", template: "%s · ClinicFlow" },
+  description: "Clinic operations and patient workflow platform",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
