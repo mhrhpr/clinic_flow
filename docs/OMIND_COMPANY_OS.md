@@ -1,46 +1,71 @@
-# ClinicFlow — OMIND Company OS Delivery Record
+# OMIND Company OS — Delivery Contract
 
-## Delivery contract
+## Purpose
 
-A change is NOT DONE because code was written, committed, or deployed.
+ClinicFlow changes are delivered through a proof-based handoff protocol. Writing code, committing code, or receiving a deployment URL is not completion.
 
-A change is HANDOFF-READY only when every gate below is green on the exact commit being handed off:
+**A change is HANDOFF-READY only when every required gate is green on the exact commit being handed off.**
 
-1. Source gate — intended changes exist on the exact branch/PR head.
-2. Static gate — web typecheck + lint pass; patient service typecheck + tests + build pass.
-3. Schema gate — Prisma generate succeeds.
-4. Production build gate — Next production build succeeds.
-5. Runtime gate — production server starts and dashboard + critical preview APIs respond.
-6. Browser gate — core flows are exercised in a real browser when browser automation is available: dashboard load, navigation, search, create patient, change appointment status, responsive layout, console errors.
-7. Deployment gate — Vercel deployment for the exact commit succeeds.
-8. Handoff gate — only then may the assistant say DONE.
+## Required delivery gates
 
-If any gate fails, the state is IN PROGRESS or BLOCKED. Report the failing gate; do not report completion.
+1. **Source gate**
+   - The intended change exists on the exact branch/PR head.
+   - CI checks out and asserts that exact commit for pull requests.
 
-## Automatically enforced gates
+2. **Static gate**
+   - Web TypeScript typecheck passes.
+   - Web lint passes.
+   - Patient service typecheck passes.
+   - Patient service tests pass.
+   - Patient service build passes.
 
-The CI workflow enforces static, schema, production-build and runtime-smoke gates.
+3. **Schema gate**
+   - Prisma generate passes on the exact commit.
 
-## Core product slice
+4. **Production build gate**
+   - npm run build passes.
 
-- Landing page
-- Dashboard
-- Patient 360 / search / creation
-- Appointment queue / status transition
-- Treatments surface
-- Billing surface
-- Clinic context foundation
+5. **Runtime gate**
+   - The production server starts.
+   - /dashboard returns non-empty HTML containing ClinicFlow.
+   - /api/demo/patients returns the expected data envelope.
+   - /api/demo/appointments returns the expected data envelope.
 
-## Verification boundary
+6. **Browser gate**
+   - Playwright exercises the production build.
+   - Dashboard loads.
+   - Navigation to Patients works.
+   - Patient creation works.
+   - Patient search works.
+   - Navigation to Appointments works.
+   - Appointment status mutation works.
+   - Browser console has no error messages during the critical flow.
+   - Screenshots, video and traces are retained on failure.
 
-Preview/demo patient and appointment data are isolated until authenticated production persistence is connected. This is not yet a production healthcare system.
+7. **Deployment gate**
+   - Vercel reports success for the exact PR head commit.
+   - CI waits for the Vercel status instead of treating a deployment URL as proof of success.
 
-## Next production gates
+8. **Handoff gate**
+   - No known blocking failure remains.
+   - Only after gates 1–7 pass may the status be reported as **DONE**.
 
-- Identity/session + RBAC
-- PostgreSQL service-owned persistence
-- Scheduling conflict/timezone policies
-- Patient access controls + audit trail
-- Integration/E2E coverage
-- Observability
-- Deployment environment and secrets
+## Failure protocol
+
+If any gate fails, status is **IN PROGRESS** or **BLOCKED**. The failing gate and concrete error must be identified and fixed before handoff.
+
+Never report completion based only on:
+- code inspection,
+- a successful commit,
+- a generated preview URL,
+- or a partial CI result.
+
+## Delivery loop
+
+Architecture → Implement → Exact-head CI → Static/Schema → Build → Runtime → Browser → Vercel → Handoff
+
+The goal is one complete verification cycle, not repeated user-side debugging.
+
+## Current boundary
+
+The current patient and appointment interactions are deliberately demo-backed through server-side in-memory state. They are not yet the authenticated service-of-record implementation described in docs/ARCHITECTURE.md. That boundary must remain explicit until the owning services are connected.
