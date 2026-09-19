@@ -122,6 +122,10 @@ model Patient {
   appointments Appointment[]
   treatments   Treatment[]
   invoices     Invoice[]
+  leads        Lead[]
+  interactions Interaction[]
+  consultations Consultation[]
+  followUps    FollowUp[]
 
   @@index([clinicId])
   @@index([clinicId, lastName, firstName])
@@ -172,6 +176,7 @@ model Service {
   clinic     Clinic          @relation(fields: [clinicId], references: [id], onDelete: Cascade)
   treatments Treatment[]
   items      InvoiceItem[]
+  leads      Lead[]
   leads      Lead[]
 
   @@unique([clinicId, code])
