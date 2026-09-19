@@ -9,9 +9,9 @@ const highlights = [
 ];
 
 const modules = [
-  { title: "مدیریت بیمار", description: "پرونده، سابقه مراجعه و وضعیت پیگیری هر بیمار در یک نمای یکپارچه.", icon: Users },
-  { title: "برنامه‌ریزی نوبت", description: "صف نوبت، وضعیت مراجعه و هماهنگی تیم درمان از یک نقطه کنترل می‌شود.", icon: CalendarDays },
-  { title: "درمان و درآمد", description: "خدمات انجام‌شده، برنامه درمان، پرداخت‌ها و مانده حساب در کنار هم.", icon: CircleDollarSign },
+  { title: "کشف نشتی درآمد", description: "لیدها، پیگیری‌های معوق، عدم مراجعه و فرصت‌های بازگشت را به فرصت درآمدی تبدیل می‌کند.", icon: Users },
+  { title: "اولویت‌بندی اقدام", description: "هر فرصت با ارزش، فوریت، شواهد و اقدام پیشنهادی در صف تیم قرار می‌گیرد.", icon: CalendarDays },
+  { title: "اندازه‌گیری نتیجه", description: "بعد از اقدام مشخص می‌شود چه اتفاقی افتاد؛ بدون ادعای درآمدسازیِ بدون شواهد.", icon: CircleDollarSign },
 ];
 
 export default function HomePage() {
@@ -34,15 +34,14 @@ export default function HomePage() {
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-[var(--brand)]/15 bg-[var(--brand-soft)] px-3.5 py-1.5 text-xs font-semibold text-[var(--brand)]">
               <Sparkles size={14} aria-hidden="true" />
-              عملیات یکپارچه برای کلینیک آیدا
+              عملیات یکپارچه Revenue OS برای کلینیک آیدا
             </div>
             <h1 className="mt-5 max-w-3xl text-4xl font-black leading-[1.2] tracking-tight sm:text-5xl lg:text-6xl">
-              کلینیک آیدا را
-              <span className="block text-[var(--brand)]">ساده‌تر، دقیق‌تر و منظم‌تر</span>
-              اداره کنید.
+              درآمدی که در کلینیک آیدا
+              <span className="block text-[var(--brand)]">در حال از دست رفتن است را پیدا کنید.</span>
             </h1>
             <p className="mt-6 max-w-2xl text-base leading-8 text-[var(--muted)] sm:text-lg">
-              ClinicFlow یک مرکز کنترل برای تیم کلینیک است؛ جایی که بیمار، نوبت، درمان و درآمد به‌جای چند ابزار پراکنده، در یک جریان عملیاتی قابل مشاهده قرار می‌گیرند.
+              ClinicFlow Revenue OS جریان درآمد کلینیک را از اولین لید تا درمان و بازگشت بیمار دنبال می‌کند؛ فرصت‌های از دست‌رفته را پیدا می‌کند، دلیل را نشان می‌دهد و اقدام بعدی را به تیم پیشنهاد می‌دهد.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <Link href="/dashboard" className="inline-flex items-center gap-2 rounded-xl bg-[var(--brand)] px-5 py-3.5 text-sm font-semibold text-white shadow-lg shadow-[var(--brand)]/15 transition hover:-translate-y-0.5">
@@ -50,7 +49,7 @@ export default function HomePage() {
                 <ArrowLeft size={17} aria-hidden="true" />
               </Link>
               <span className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm font-medium text-[var(--muted)]">
-                طراحی شده برای تیم آیدا
+                تشخیص → اقدام → اندازه‌گیری
               </span>
             </div>
 
@@ -84,30 +83,30 @@ export default function HomePage() {
 
                 <div className="mt-6 grid grid-cols-2 gap-3">
                   <article className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
-                    <p className="text-xs text-[var(--muted)]">درآمد ماه</p>
-                    <p className="mt-2 text-2xl font-black">۱۲٫۴۸ م</p>
-                    <p className="mt-1 text-[11px] text-[var(--success)]">۸٫۴٪ رشد</p>
+                    <p className="text-xs text-[var(--muted)]">درآمد در معرض ریسک</p>
+                    <p className="mt-2 text-2xl font-black">۴٫۸ م</p>
+                    <p className="mt-1 text-[11px] text-[var(--danger)]">۷ فرصت نیازمند اقدام</p>
                   </article>
                   <article className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
-                    <p className="text-xs text-[var(--muted)]">مانده حساب‌ها</p>
-                    <p className="mt-2 text-2xl font-black">۳٫۲۴ م</p>
-                    <p className="mt-1 text-[11px] text-[var(--muted)]">۱۸ فاکتور باز</p>
+                    <p className="text-xs text-[var(--muted)]">پیگیری‌های معوق</p>
+                    <p className="mt-2 text-2xl font-black">۷</p>
+                    <p className="mt-1 text-[11px] text-[var(--muted)]">۳ مورد ارزش بالا</p>
                   </article>
                 </div>
 
                 <div className="mt-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-bold">صف نوبت امروز</p>
-                      <p className="mt-1 text-xs text-[var(--muted)]">نمای لحظه‌ای جریان مراجعه</p>
+                      <p className="text-sm font-bold">فرصت‌های درآمدی امروز</p>
+                      <p className="mt-1 text-xs text-[var(--muted)]">اولویت‌بندی‌شده بر اساس ارزش، فوریت و شواهد</p>
                     </div>
                     <ChartNoAxesCombined size={20} className="text-[var(--brand)]" aria-hidden="true" />
                   </div>
                   <div className="mt-4 space-y-3">
                     {[
-                      ["۰۹:۳۰", "سارا محمدی", "مشاوره پوست", "تأیید شده"],
-                      ["۱۰:۱۵", "النا کریمی", "جوان‌سازی پوست", "در انتظار"],
-                      ["۱۱:۰۰", "مریم حسینی", "مشاوره بوتاکس", "تأیید شده"],
+                      ["ارزش بالا", "سارا محمدی", "مشاوره پوست", "پیگیری امروز"],
+                      ["معوق", "النا کریمی", "جوان‌سازی پوست", "اقدام لازم"],
+                      ["تکرار", "مریم حسینی", "مشاوره بوتاکس", "پیشنهاد بازگشت"],
                     ].map(([time, patient, service, status]) => (
                       <div key={time} className="flex items-center gap-3 rounded-xl bg-[var(--background)] px-3 py-3">
                         <span className="w-12 text-xs font-bold">{time}</span>
@@ -123,8 +122,8 @@ export default function HomePage() {
 
                 <div className="mt-4 flex items-center justify-between rounded-2xl bg-[var(--brand)] p-4 text-white">
                   <div>
-                    <p className="text-sm font-bold">یک تصمیم، یک جریان</p>
-                    <p className="mt-1 text-xs text-white/75">از پذیرش تا پیگیری درمان</p>
+                    <p className="text-sm font-bold">یک فرصت، یک اقدام</p>
+                    <p className="mt-1 text-xs text-white/75">اقدام ثبت می‌شود و نتیجه قابل اندازه‌گیری است</p>
                   </div>
                   <ShieldCheck size={23} aria-hidden="true" />
                 </div>
@@ -136,9 +135,9 @@ export default function HomePage() {
         <section className="border-t border-[var(--border)] py-14 lg:py-18">
           <div className="max-w-2xl">
             <p className="text-sm font-semibold text-[var(--brand)]">ساختار محصول</p>
-            <h2 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">تمام عملیات اصلی، در یک زبان مشترک.</h2>
+            <h2 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">از داده عملیاتی تا درآمد قابل اندازه‌گیری.</h2>
             <p className="mt-4 text-sm leading-7 text-[var(--muted)]">
-              طراحی ClinicFlow حول تصمیم‌های روزمره کلینیک انجام شده است؛ نه صرفاً حول فرم‌ها و جدول‌های جدا از هم.
+              ClinicFlow به‌جای اضافه‌کردن یک CRM دیگر، روی یک سؤال اقتصادی تمرکز می‌کند: امروز کجا پول در حال از دست رفتن است و تیم باید چه کاری انجام دهد؟
             </p>
           </div>
           <div className="mt-8 grid gap-4 md:grid-cols-3">
@@ -161,8 +160,8 @@ export default function HomePage() {
           <div className="flex flex-col gap-6 rounded-[1.75rem] border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-8">
             <div>
               <p className="text-sm font-semibold text-[var(--brand)]">برای کلینیک آیدا</p>
-              <h2 className="mt-2 text-2xl font-black tracking-tight">از صفحه‌ی امروز شروع کنید.</h2>
-              <p className="mt-2 text-sm text-[var(--muted)]">داشبورد عملیاتی، بیماران و نوبت‌ها همین حالا در نسخه نمایشی در دسترس‌اند.</p>
+              <h2 className="mt-2 text-2xl font-black tracking-tight">از نشتی درآمد شروع کنید.</h2>
+              <p className="mt-2 text-sm text-[var(--muted)]">نسخه فعلی جریان فرصت‌های درآمدی را به‌صورت نمایشی نشان می‌دهد؛ لایه تولیدی با داده واقعی بعد از اعتبارسنجی پایلوت فعال می‌شود.</p>
             </div>
             <Link href="/dashboard" className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--brand)] px-5 py-3 text-sm font-semibold text-white">
               ورود به ClinicFlow
