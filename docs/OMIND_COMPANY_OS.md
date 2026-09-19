@@ -25,6 +25,10 @@ The repository already contained architecture and reference-standard documents. 
 7. Billing module surface
 8. Existing clinic-context and bounded-service foundation preserved
 
+## Verification
+
+Every delivery must pass repository CI before Preview handoff. Browser-level verification is performed when the browser automation runtime is available.
+
 ## Verification boundary
 This commit is a functional product/demo slice. Patient and appointment mutations are local UI state until authenticated service persistence is connected. It is not represented as a production healthcare system.
 
