@@ -148,7 +148,7 @@ export default function HomePage() {
                   <span className="grid size-11 place-items-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)]">
                     <Icon size={19} aria-hidden="true" />
                   </span>
-                  <span className="text-xs font-semibold text-[var(--muted)]">۰{index + ۱}</span>
+                  <span className="text-xs font-semibold text-[var(--muted)]">۰{index + 1}</span>
                 </div>
                 <h3 className="mt-5 text-lg font-bold">{title}</h3>
                 <p className="mt-2 text-sm leading-7 text-[var(--muted)]">{description}</p>
