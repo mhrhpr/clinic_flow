@@ -1,21 +1,2 @@
 import Link from "next/link";
-
-export default function HomePage() {
-  return (
-    <main className="flex min-h-screen items-center justify-center px-6 py-12">
-      <section className="w-full max-w-xl rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] p-8 shadow-sm">
-        <p className="mb-2 text-sm font-semibold uppercase tracking-wide text-[var(--brand)]">ClinicFlow</p>
-        <h1 className="text-3xl font-bold tracking-tight">Clinic operations, designed around the clinic.</h1>
-        <p className="mt-4 leading-7 text-[var(--muted)]">
-          Multi-tenant, multi-branch and configurable by clinic. The application foundation is now in place.
-        </p>
-        <Link
-          href="/dashboard"
-          className="mt-6 inline-flex rounded-lg bg-[var(--brand)] px-4 py-2.5 text-sm font-semibold text-[var(--brand-foreground)]"
-        >
-          Open dashboard
-        </Link>
-      </section>
-    </main>
-  );
-}
+export default function HomePage() { return <main className="min-h-screen bg-[var(--background)] px-6 py-16"><div className="mx-auto max-w-6xl"><nav className="flex items-center justify-between"><span className="text-lg font-bold">ClinicFlow</span><span className="text-sm text-[var(--muted)]">Clinic operations platform</span></nav><section className="grid items-center gap-12 py-24 lg:grid-cols-[1.05fr_.95fr]"><div><p className="text-sm font-semibold uppercase tracking-[.18em] text-[var(--brand)]">Patient · Schedule · Revenue</p><h1 className="mt-4 max-w-3xl text-5xl font-bold tracking-tight sm:text-6xl">Run the clinic from one operational flow.</h1><p className="mt-6 max-w-2xl text-lg leading-8 text-[var(--muted)]">ClinicFlow connects patients, appointments, treatments and billing around the clinic—not around disconnected spreadsheets.</p><Link href="/dashboard" className="mt-8 inline-flex rounded-xl bg-[var(--brand)] px-5 py-3 text-sm font-semibold text-white shadow-sm">Open product demo →</Link></div><div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-4 shadow-xl"><div className="rounded-2xl bg-[var(--background)] p-5"><div className="flex items-center justify-between"><span className="font-semibold">Today</span><span className="text-xs text-[var(--muted)]">Aida Clinic</span></div><div className="mt-5 grid grid-cols-2 gap-3"><div className="rounded-xl bg-[var(--surface)] p-4"><span className="text-xs text-[var(--muted)]">Patients</span><p className="mt-2 text-2xl font-bold">248</p></div><div className="rounded-xl bg-[var(--surface)] p-4"><span className="text-xs text-[var(--muted)]">Appointments</span><p className="mt-2 text-2xl font-bold">18</p></div><div className="col-span-2 rounded-xl bg-[var(--surface)] p-4"><span className="text-xs text-[var(--muted)]">Next patient</span><p className="mt-2 font-semibold">Emma Carter · 10:15</p><p className="mt-1 text-xs text-[var(--muted)]">Skin treatment · Dr. A. Rahimi</p></div></div></div></div></section></div></main>; }
