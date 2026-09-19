@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
+    "test:e2e": "playwright test",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
@@ -27,6 +28,7 @@
     "zod": "^4.2.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.55.0",
     "@tailwindcss/postcss": "^4.1.18",
     "@types/node": "^22.10.0",
     "@types/react": "^19.0.0",
@@ -34,7 +36,6 @@
     "eslint": "^9.0.0",
     "eslint-config-next": "^16.1.5",
     "postcss": "^8.4.49",
-    "prisma": "^6.15.0",
     "tailwindcss": "^4.1.18",
     "typescript": "^5.7.0"
   }
