@@ -1,4 +1,5 @@
 name: CI
+# Revenue OS validation contract
 
 on:
   push:
@@ -6,13 +7,23 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+  statuses: read
+
 jobs:
   web:
     name: Web validation
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout exact PR head
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Assert exact source commit
+        run: |
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -25,11 +36,82 @@ jobs:
       - name: Prisma generate
         run: npx prisma generate
 
+      - name: Unit tests
+        run: npm run test:unit
+
       - name: Typecheck web
         run: npm run typecheck
 
       - name: Lint web
         run: npm run lint
+
+      - name: Production build
+        run: npm run build
+
+      - name: Install Chromium for browser smoke
+        run: npx playwright install --with-deps chromium
+
+      - name: Start production server
+        run: |
+          npm run start -- -H 127.0.0.1 -p 3100 > /tmp/clinicflow-next.log 2>&1 &
+          echo $! > /tmp/clinicflow-next.pid
+
+      - name: Runtime smoke test
+        run: |
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:3100/dashboard > /tmp/dashboard.html; then break; fi
+            sleep 1
+          done
+          test -s /tmp/dashboard.html
+          grep -q "ClinicFlow" /tmp/dashboard.html
+          curl -fsS http://127.0.0.1:3100/api/demo/patients | grep -q '"data"'
+          curl -fsS http://127.0.0.1:3100/api/demo/appointments | grep -q '"data"'
+
+      - name: Browser smoke test
+        run: npm run test:e2e
+
+      - name: Stop production server
+        if: always()
+        run: |
+          if [ -f /tmp/clinicflow-next.pid ]; then kill $(cat /tmp/clinicflow-next.pid) || true; fi
+          if [ -f /tmp/clinicflow-next.log ]; then tail -n 80 /tmp/clinicflow-next.log; fi
+
+      - name: Wait for Vercel deployment on exact commit
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const sha = context.payload.pull_request.head.sha;
+            const deadline = Date.now() + 20 * 60 * 1000;
+            let lastState = "not-found";
+
+            while (Date.now() < deadline) {
+              const { data } = await github.rest.repos.listCommitStatusesForRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: sha
+              });
+
+              const vercels = data
+                .filter((status) => status.context === "Vercel")
+                .sort((a, b) => new Date(b.updated_at || b.created_at).getTime() - new Date(a.updated_at || a.created_at).getTime());
+
+              const vercel = vercels[0];
+
+              if (vercel) {
+                lastState = vercel.state;
+                core.notice("Vercel status for " + sha + ": " + vercel.state);
+                if (vercel.state === "success") return;
+                if (["failure", "error"].includes(vercel.state)) {
+                  core.setFailed("Vercel deployment failed: " + (vercel.description || vercel.target_url || vercel.state));
+                  return;
+                }
+              }
+
+              await new Promise((resolve) => setTimeout(resolve, 10_000));
+            }
+
+            core.setFailed("Vercel deployment did not reach success before the deadline. Last state: " + lastState);
 
   patient-service:
     name: Patient service validation
@@ -38,8 +120,14 @@ jobs:
       run:
         working-directory: services/patient-service
     steps:
-      - name: Checkout
+      - name: Checkout exact PR head
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Assert exact source commit
+        run: |
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
 
       - name: Setup Node
         uses: actions/setup-node@v4

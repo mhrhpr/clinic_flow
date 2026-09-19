@@ -7,13 +7,14 @@ export function buildApp(): FastifyInstance {
   });
 
   app.setErrorHandler((error, _request, reply) => {
-    app.log.error(error);
+    app.log.error(error instanceof Error ? error : new Error(String(error)));
+    const errorName = error instanceof Error ? error.name : "";
 
-    if (error.name === "ZodError") {
+    if (errorName === "ZodError") {
       return reply.code(400).send({ error: "INVALID_REQUEST" });
     }
 
-    if (error.name === "MissingClinicContextError") {
+    if (errorName === "MissingClinicContextError") {
       return reply.code(400).send({ error: "MISSING_CLINIC_CONTEXT" });
     }
 

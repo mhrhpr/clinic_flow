@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "ClinicFlow",
-  description: "Clinic operations and management platform",
+  title: { default: "کلینیک آیدا · ClinicFlow", template: "%s · کلینیک آیدا" },
+  description: "سامانه مدیریت و جریان عملیاتی کلینیک آیدا",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" dir="ltr">
+    <html lang="fa" dir="rtl">
       <body>{children}</body>
     </html>
   );
