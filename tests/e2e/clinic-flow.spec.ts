@@ -7,29 +7,29 @@ test("critical ClinicFlow patient and appointment workflows", async ({ page }) =
   });
 
   await page.goto("/dashboard");
-  await expect(page.getByRole("heading", { name: "Good morning, clinic team." })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "صبح بخیر، تیم آیدا." })).toBeVisible();
 
-  await page.getByRole("link", { name: "Patients" }).click();
-  await expect(page.getByRole("heading", { name: "Patients" })).toBeVisible();
+  await page.getByRole("link", { name: "بیماران" }).click();
+  await expect(page.getByRole("heading", { name: "بیماران" })).toBeVisible();
 
-  const uniqueName = "E2E ClinicFlow Patient";
-  const uniquePhone = "+1 202 555 0199";
-  await page.getByRole("button", { name: "+ New patient" }).click();
-  const dialog = page.getByRole("dialog", { name: "New patient" });
+  const uniqueName = "بیمار تست ClinicFlow";
+  const uniquePhone = "۰۹۱۲ ۲۰۲ ۰۱۹۹";
+  await page.getByRole("button", { name: "+ ثبت بیمار جدید" }).click();
+  const dialog = page.getByRole("dialog", { name: "ثبت بیمار جدید" });
   await expect(dialog).toBeVisible();
-  await dialog.getByLabel("Full name").fill(uniqueName);
-  await dialog.getByLabel("Phone", { exact: true }).fill(uniquePhone);
-  await dialog.getByLabel("Initial service").fill("E2E consultation");
-  await dialog.getByRole("button", { name: "Create patient" }).click();
+  await dialog.getByLabel("نام و نام خانوادگی").fill(uniqueName);
+  await dialog.getByLabel("شماره تلفن").fill(uniquePhone);
+  await dialog.getByLabel("خدمت اولیه").fill("مشاوره پوست");
+  await dialog.getByRole("button", { name: "ثبت بیمار" }).click();
 
   await expect(page.getByRole("cell", { name: uniqueName })).toBeVisible();
-  await page.getByRole("textbox", { name: "Search patients, phone or treatment" }).fill("E2E ClinicFlow");
+  await page.getByRole("textbox", { name: "جست‌وجوی بیمار، تلفن یا خدمت" }).fill("ClinicFlow");
   await expect(page.getByRole("cell", { name: uniqueName })).toBeVisible();
 
-  await page.getByRole("link", { name: "Appointments" }).click();
-  await expect(page.getByRole("heading", { name: "Appointments" })).toBeVisible();
+  await page.getByRole("link", { name: "نوبت‌ها" }).click();
+  await expect(page.getByRole("heading", { name: "نوبت‌ها" })).toBeVisible();
 
-  const statusSelect = page.getByLabel("Status for Emma Carter");
+  const statusSelect = page.getByLabel("وضعیت نوبت النا کریمی");
   await statusSelect.selectOption("Completed");
   await expect(statusSelect).toHaveValue("Completed");
 
