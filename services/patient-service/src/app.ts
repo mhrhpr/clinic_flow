@@ -13,7 +13,7 @@ export function buildApp(): FastifyInstance {
       return reply.code(400).send({ error: "INVALID_REQUEST" });
     }
 
-    if (error.name === "MissingClinicContextError") {
+    if (errorName === "MissingClinicContextError") {
       return reply.code(400).send({ error: "MISSING_CLINIC_CONTEXT" });
     }
 
