@@ -34,6 +34,9 @@ jobs:
       - name: Production build
         run: npm run build
 
+      - name: Install Chromium for browser smoke
+        run: npx playwright install --with-deps chromium
+
       - name: Start production server
         run: |
           npm run start -- -H 127.0.0.1 -p 3100 > /tmp/clinicflow-next.log 2>&1 &
@@ -49,6 +52,9 @@ jobs:
           grep -q "ClinicFlow" /tmp/dashboard.html
           curl -fsS http://127.0.0.1:3100/api/demo/patients | grep -q '"data"'
           curl -fsS http://127.0.0.1:3100/api/demo/appointments | grep -q '"data"'
+
+      - name: Browser smoke test
+        run: npm run test:e2e
 
       - name: Stop production server
         if: always()
