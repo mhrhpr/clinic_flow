@@ -7,7 +7,7 @@ export function buildApp(): FastifyInstance {
   });
 
   app.setErrorHandler((error, _request, reply) => {
-    app.log.error(error);
+    app.log.error(error instanceof Error ? error : new Error(String(error)));
 
     if (error.name === "ZodError") {
       return reply.code(400).send({ error: "INVALID_REQUEST" });
